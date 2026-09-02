@@ -1,50 +1,25 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/features/cartSlice';
 import toast from 'react-hot-toast';
 import { ShoppingBag } from 'lucide-react';
-
-const newArrivals = [
-  {
-    id: 101,
-    slug: 'ankara-infused-evening-gown',
-    name: 'Ankara Infused Evening Gown',
-    price: '₦45,000',
-    image: '/assets/images/gowns/gown1.jpeg',
-    category: 'Gowns',
-  },
-  {
-    id: 102,
-    slug: 'elegant-lace-overlay-gown',
-    name: 'Elegant Lace Overlay Gown',
-    price: '₦65,000',
-    image: '/assets/images/gowns/gown2.jpeg',
-    category: 'Gowns',
-  },
-  {
-    id: 103,
-    slug: 'sleek-silk-statement-gown',
-    name: 'Sleek Silk Statement Gown',
-    price: '₦55,000',
-    image: '/assets/images/gowns/gown3.jpeg',
-    category: 'Gowns',
-  },
-  {
-    id: 104,
-    slug: 'royal-chiffon-mermaid-gown',
-    name: 'Royal Chiffon Mermaid Gown',
-    price: '₦75,000',
-    image: '/assets/images/gowns/gown1.jpeg',
-    category: 'Gowns',
-  },
-];
+import { Product, useProducts } from '../../context/ProductContext';
 
 export default function NewArrivalsSection() {
   const dispatch = useDispatch();
+  const { products, isLoaded } = useProducts();
 
-  const handleAddToCart = (product: typeof newArrivals[0]) => {
+  const newArrivals = useMemo(() => {
+    if (!isLoaded) return [];
+    return [...products]
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+      .slice(0, 4);
+  }, [isLoaded, products]);
+
+  const handleAddToCart = (product: Product) => {
     dispatch(addToCart({ ...product }));
     toast.success(`${product.name} added to cart!`, { icon: '🛍️' });
   };
@@ -65,7 +40,7 @@ export default function NewArrivalsSection() {
           {newArrivals.map((product) => (
             <div key={product.id} className="group">
               {/* Fixed height on mobile to prevent excessive scroll */}
-              <div className="relative h-52 sm:h-64 md:aspect-[3/4] md:h-auto bg-zinc-100 mb-5 overflow-hidden rounded-xl">
+              <div className="relative h-52 sm:h-64 md:aspect-3/4 md:h-auto bg-zinc-100 mb-5 overflow-hidden rounded-xl">
                 <Link href={`/products/${product.slug}`} className="block w-full h-full">
                   <img
                     src={product.image}
@@ -105,13 +80,13 @@ export default function NewArrivalsSection() {
 
         <div className="mt-12 text-center">
           <Link
-            href="/categories/gowns"
+            href="/categories/clothes"
             className="inline-flex items-center justify-center px-8 py-3 border text-base font-medium rounded-md transition-all duration-300 hover:text-white"
             style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#D4AF37')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
-            View All Gowns
+            View All Clothing
           </Link>
         </div>
       </div>

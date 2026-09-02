@@ -2,15 +2,15 @@ export default function AboutSection() {
   return (
     <section id="about" className="py-10 bg-zinc-900 text-zinc-50 relative overflow-hidden">
       {/* Abstract Background Element */}
-      <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] rounded-full bg-zinc-800/50 blur-3xl opacity-50 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-[400px] h-[400px] rounded-full bg-zinc-800/30 blur-3xl opacity-50 pointer-events-none" />
+      <div className="absolute top-0 right-0 -mr-32 -mt-32 w-150 h-150 rounded-full bg-zinc-800/50 blur-3xl opacity-50 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-100 h-100 rounded-full bg-zinc-800/30 blur-3xl opacity-50 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
           {/* Images */}
           <div className="relative">
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden">
+            <div className="aspect-4/5 rounded-2xl overflow-hidden">
               <img 
                 src="https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1000&auto=format&fit=crop" 
                 alt="Boutique Interior" 
@@ -40,9 +40,9 @@ export default function AboutSection() {
                 curates collections that empower you to express your unique identity.
               </p>
               <p>
-                From hand-crafted shoes and luxurious handbags to tailored skirts, blouses, and breathtaking gowns, 
-                every piece in our store is selected to offer you the finest in modern fashion. We do more than just 
-                sell clothes; we curate wardrobes that inspire confidence.
+                From tailored skirts and blouses to expressive statement pieces, every item in our store is selected 
+                to offer you the finest in modern fashion. We do more than just sell clothes; we curate wardrobes that 
+                inspire confidence.
               </p>
             </div>
 

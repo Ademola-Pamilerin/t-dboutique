@@ -46,7 +46,7 @@ export default function Footer() {
               <li><Link href="#about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="#contact" className="hover:text-white transition-colors">Contact</Link></li>
               <li><Link href="#careers" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="#privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/admin" className="hover:text-white transition-colors flex items-center gap-1.5" style={{ color: '#D4AF37' }}>⚙️ Admin Portal</Link></li>
             </ul>
           </div>
 

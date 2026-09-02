@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Search } from 'lucide-react';
 import Link from 'next/link';
-import { ALL_PRODUCTS, CATEGORIES } from '../../categories/[slug]/categoryData';
+import { useProducts } from '../../context/ProductContext';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -11,13 +11,15 @@ interface SearchModalProps {
 }
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  const { products, categories } = useProducts();
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const results = query.trim().length > 0
-    ? ALL_PRODUCTS.filter(p =>
+    ? products.filter(p =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
+        p.category.toLowerCase().includes(query.toLowerCase()) ||
+        (p.fabric && p.fabric.toLowerCase().includes(query.toLowerCase()))
       )
     : [];
 
@@ -59,7 +61,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search gowns, shoes, handbags..."
+            placeholder="Search clothing..."
             className="flex-1 text-base text-zinc-900 placeholder-zinc-400 outline-none font-inter"
           />
           <button
@@ -77,17 +79,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div className="px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Browse Categories</p>
               <div className="flex flex-wrap gap-2">
-                {['Gowns', 'Shoes', 'Sandals', 'Slippers', 'Handbags', 'Clothes'].map(cat => (
+                {categories.map(cat => (
                   <Link
-                    key={cat}
-                    href={`/categories/${cat.toLowerCase()}`}
+                    key={cat.slug}
+                    href={`/categories/${cat.slug}`}
                     onClick={onClose}
                     className="px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 hover:text-white"
                     style={{ borderColor: '#D4AF37', color: '#a18143' }}
                     onMouseEnter={e => { e.currentTarget.style.background = '#D4AF37'; e.currentTarget.style.color = '#fff'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#a18143'; }}
                   >
-                    {cat}
+                    {cat.name}
                   </Link>
                 ))}
               </div>

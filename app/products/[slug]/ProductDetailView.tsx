@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
@@ -8,6 +8,7 @@ import { addToCart } from '../../store/features/cartSlice';
 import toast from 'react-hot-toast';
 import { Product } from '../../categories/[slug]/categoryData';
 import { ShoppingBag, MessageSquare, Check, ShieldCheck, Truck, Sparkles, ChevronRight, ChevronLeft, Minus, Plus, Maximize2, X } from 'lucide-react';
+import { useProducts } from '../../context/ProductContext';
 
 interface ProductDetailViewProps {
   product: Product;
@@ -16,15 +17,34 @@ interface ProductDetailViewProps {
 
 const defaultViewLabels = ['Front View', 'Side Angle', 'Back Silhouette', 'Full Length', 'Fabric Detail'];
 
-export default function ProductDetailView({ product, relatedProducts }: ProductDetailViewProps) {
+export default function ProductDetailView({ product: initialProduct, relatedProducts: initialRelated }: ProductDetailViewProps) {
   const dispatch = useDispatch();
+  const { getProductBySlug, products, isLoaded } = useProducts();
+
+  // Retrieve live updated product from ProductContext if available
+  const product = useMemo(() => {
+    if (isLoaded && initialProduct?.slug) {
+      const live = getProductBySlug(initialProduct.slug);
+      if (live) return live;
+    }
+    return initialProduct;
+  }, [isLoaded, initialProduct, getProductBySlug]);
+
+  const relatedProducts = useMemo(() => {
+    if (isLoaded && product) {
+      return products
+        .filter((p) => p.categorySlug === product.categorySlug && String(p.id) !== String(product.id))
+        .slice(0, 4);
+    }
+    return initialRelated;
+  }, [isLoaded, product, products, initialRelated]);
   
   const images = product.gallery && product.gallery.length > 0
     ? product.gallery
     : [product.image];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  const [selectedImage, setSelectedImage] = useState(images[0] || product.image);
   const [selectedSize, setSelectedSize] = useState(product.sizes ? product.sizes[0] : 'Standard');
   const [selectedColor, setSelectedColor] = useState(product.colors ? product.colors[0] : 'Default');
   const [quantity, setQuantity] = useState(1);
@@ -64,9 +84,7 @@ export default function ProductDetailView({ product, relatedProducts }: ProductD
     });
   };
 
-  const productPageUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/products/${product.slug}`
-    : `/products/${product.slug}`;
+  const productPageUrl = `/products/${product.slug}`;
 
   const detailsList = product.details && product.details.length > 0
     ? product.details.map((d) => `  • ${d}`).join('\n')

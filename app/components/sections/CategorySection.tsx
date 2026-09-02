@@ -1,12 +1,7 @@
 import Link from 'next/link';
 
 const categories = [
-  { name: 'Shoes', slug: 'shoes', image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800&auto=format&fit=crop' },
-  { name: 'Sandals', slug: 'sandals', image: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&w=800&auto=format&fit=crop' },
-  { name: 'Slippers', slug: 'slippers', image: 'https://images.unsplash.com/photo-1588661661153-dfbc227582b6?q=80&w=800&auto=format&fit=crop' },
-  { name: 'Handbags', slug: 'handbags', image: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?q=80&w=800&auto=format&fit=crop' },
-  { name: 'Clothes (Skirts & Blouses)', slug: 'clothes', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop' },
-  { name: 'Gowns', slug: 'gowns', image: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?q=80&w=800&auto=format&fit=crop' },
+  { name: 'Clothes (Skirts & Blouses)', slug: 'clothes', image: '/assets/images/products/product-01.jpeg' },
 ];
 
 export default function CategorySection() {

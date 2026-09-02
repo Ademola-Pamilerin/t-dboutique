@@ -7,49 +7,18 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/features/cartSlice";
 import toast from "react-hot-toast";
 import { ShoppingBag } from "lucide-react";
-
-const featuredItems = [
-  {
-    id: 103,
-    slug: 'sleek-silk-statement-gown',
-    name: "Silk Evening Gown",
-    category: "Gowns",
-    price: "₦55,000",
-    image: "/assets/images/gowns/gown3.jpeg",
-  },
-  {
-    id: 201,
-    slug: 'suede-pointed-mules',
-    name: "Suede Pointed Mules",
-    category: "Shoes",
-    price: "₦150,000",
-    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 502,
-    slug: 'minimalist-crossbody-bag',
-    name: "Minimalist Crossbody",
-    category: "Handbags",
-    price: "₦120,000",
-    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 501,
-    slug: 'classic-leather-tote',
-    name: "Classic Leather Tote",
-    category: "Handbags",
-    price: "₦250,000",
-    image: "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?q=80&w=800&auto=format&fit=crop",
-  },
-];
+import { Product } from "../../context/ProductContext";
+import { useProducts } from "../../context/ProductContext";
 
 export default function FeaturedCollection() {
   const dispatch = useDispatch();
+  const { products, isLoaded } = useProducts();
+  const featuredItems = isLoaded ? products.slice(0, 4) : [];
 
-  const handleAddToCart = (item: typeof featuredItems[0]) => {
+  const handleAddToCart = (item: Product) => {
     dispatch(addToCart({ ...item }));
     toast.success(`${item.name} added to cart!`, {
-      icon: '🛍️',
+      icon: "🛍️",
     });
   };
 
@@ -65,10 +34,14 @@ export default function FeaturedCollection() {
             className="max-w-2xl"
           >
             <h2 className="text-4xl md:text-5xl font-playfair font-bold text-zinc-900 mb-4">
-              Trending <span className="italic font-light" style={{ color: '#D4AF37' }}>Now</span>
+              Trending{" "}
+              <span className="italic font-light" style={{ color: "#D4AF37" }}>
+                Now
+              </span>
             </h2>
             <p className="text-zinc-600 font-inter">
-              Curated essentials that embody effortless style and unparalleled craftsmanship.
+              Curated essentials that embody effortless style and unparalleled
+              craftsmanship.
             </p>
           </motion.div>
 
@@ -82,7 +55,7 @@ export default function FeaturedCollection() {
             <Link
               href="/categories/all"
               className="text-sm font-medium tracking-wider uppercase pb-1 hover:opacity-70 transition-opacity border-b"
-              style={{ color: '#D4AF37', borderColor: '#D4AF37' }}
+              style={{ color: "#D4AF37", borderColor: "#D4AF37" }}
             >
               View All Products
             </Link>
@@ -101,14 +74,18 @@ export default function FeaturedCollection() {
             >
               <div>
                 {/* Fixed smaller height on mobile with Link */}
-                <div className="relative h-48 sm:h-64 md:aspect-[4/5] md:h-auto mb-4 overflow-hidden bg-zinc-100 rounded-xl">
-                  <Link href={`/products/${item.slug}`} className="block w-full h-full">
+                <div className="relative h-64 sm:h-80 md:h-100 mb-4 overflow-hidden bg-zinc-100 rounded-xl">
+                  <Link
+                    href={`/products/${item.slug}`}
+                    className="block w-full h-full"
+                  >
                     <Image
                       src={item.image}
+                      // src={"/assets/images/products/product-03.jpeg"}
                       alt={item.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 25vw"
+                      className="object-contain transition-transform duration-700 group-hover:scale-105"
+                      // sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 25vw"
                     />
                   </Link>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
@@ -116,14 +93,18 @@ export default function FeaturedCollection() {
                   <button
                     onClick={() => handleAddToCart(item)}
                     className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 text-white text-xs tracking-widest uppercase opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 px-4 py-2 rounded-sm font-semibold whitespace-nowrap"
-                    style={{ background: 'linear-gradient(135deg, #D4AF37, #a18143)' }}
+                    style={{
+                      background: "linear-gradient(135deg, #D4AF37, #a18143)",
+                    }}
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     Add to Cart
                   </button>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">{item.category}</p>
+                  <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">
+                    {item.category}
+                  </p>
                   <Link href={`/products/${item.slug}`} className="block group">
                     <h3 className="text-base md:text-lg font-playfair text-zinc-900 mb-1 group-hover:text-gold-500 transition-colors line-clamp-1">
                       {item.name}
@@ -132,7 +113,12 @@ export default function FeaturedCollection() {
                 </div>
               </div>
               <div className="text-center mt-1">
-                <p className="text-sm font-semibold" style={{ color: '#D4AF37' }}>{item.price}</p>
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: "#D4AF37" }}
+                >
+                  {item.price}
+                </p>
               </div>
             </motion.div>
           ))}

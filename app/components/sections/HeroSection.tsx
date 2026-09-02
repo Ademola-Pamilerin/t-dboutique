@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function HeroSection() {
   return (
-    <section className="relative w-full h-[100dvh] flex items-center justify-center overflow-hidden bg-white">
+    <section className="hero-section relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-white">
       {/* Background Image / Video Placeholder */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black/20 z-10" />
@@ -18,8 +18,8 @@ export default function HeroSection() {
         />
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="max-w-2xl">
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="hero-content max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -38,7 +38,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-xl text-zinc-200 mb-10 max-w-lg font-inter font-light"
+            className="mb-10 max-w-lg font-inter text-lg font-light text-zinc-200 md:text-xl"
           >
             Discover exclusive collections designed for the contemporary trendsetter. Step into a world of premium fashion at T&D.
           </motion.p>
@@ -70,7 +70,7 @@ export default function HeroSection() {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
-          className="w-[1px] h-12 bg-white/50"
+          className="w-px h-12 bg-white/50"
         />
       </motion.div>
     </section>

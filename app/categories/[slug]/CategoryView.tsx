@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Product, CATEGORIES } from './categoryData';
+import { Product } from './categoryData';
 import AddToCartButton from './AddToCartButton';
 import { SlidersHorizontal, Sparkles, Search } from 'lucide-react';
+import { useProducts } from '../../context/ProductContext';
 
 interface CategoryViewProps {
   currentSlug: string;
@@ -19,12 +20,21 @@ export default function CategoryView({
   categoryTitle,
   categoryDescription,
 }: CategoryViewProps) {
+  const { categories, getProductsByCategory, isLoaded } = useProducts();
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'newest'>('featured');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Source products from dynamic context once loaded, else fallback to initial
+  const sourceProducts = useMemo(() => {
+    if (isLoaded) {
+      return getProductsByCategory(currentSlug);
+    }
+    return initialProducts;
+  }, [isLoaded, currentSlug, getProductsByCategory, initialProducts]);
+
   // Filter & Sort Products
   const filteredProducts = useMemo(() => {
-    let result = [...initialProducts];
+    let result = [...sourceProducts];
 
     // Filter by search query if any
     if (searchQuery.trim()) {
@@ -54,7 +64,7 @@ export default function CategoryView({
     }
 
     return result;
-  }, [initialProducts, searchQuery, sortBy]);
+  }, [sourceProducts, searchQuery, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +118,7 @@ export default function CategoryView({
           >
             All Products
           </Link>
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = currentSlug.toLowerCase() === cat.slug.toLowerCase();
             return (
               <Link

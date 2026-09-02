@@ -43,7 +43,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     : foundCategory?.name || (slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '));
 
   const categoryDescription = normalizedSlug === 'all'
-    ? 'Browse our complete catalog of luxury gowns, handcrafted footwear, designer handbags, and tailored Nigerian apparel.'
+    ? 'Browse our complete catalog of tailored clothing and contemporary Nigerian fashion.'
     : foundCategory?.description || `Explore our meticulously curated ${categoryTitle.toLowerCase()} collection. Crafted for elegance and timeless style.`;
 
   // Get matching products

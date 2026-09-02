@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { ShoppingBag, Search } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, ShieldCheck } from "lucide-react";
 import CartDrawer from "../cart/CartDrawer";
 import SearchModal from "../search/SearchModal";
 
@@ -23,14 +23,31 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const pathname = usePathname();
 
   const cartCount = useSelector((state: RootState) =>
     state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
   );
 
+  // Smooth & passive scroll handler
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Check initial scroll
+    if (typeof window !== "undefined") {
+      setScrolled(window.scrollY > 20);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    }
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -46,101 +63,98 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
+  // Smooth scroll handler for anchor links
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      if (href.startsWith("/#") && pathname === "/") {
+        e.preventDefault();
+        const targetId = href.replace("/#", "");
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setIsOpen(false);
+      } else {
+        setIsOpen(false);
+      }
+    },
+    [pathname]
+  );
+
   return (
     <>
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
 
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className={`fixed w-full top-0 z-40 transition-all duration-300 ${
+      {/* Fixed Header with smooth GPU-accelerated background and shadow transitions */}
+      <header
+        className={`fixed w-full top-0 z-40 will-change-transform transition-colors duration-200 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-xl shadow-md py-4"
-            : "bg-white/80 backdrop-blur-md shadow-sm py-6"
+            ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-zinc-200/80 py-3.5"
+            : "bg-white/85 backdrop-blur-sm border-b border-zinc-100/60 py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center relative">
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0 flex items-center gap-4 group">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
+          <div className="flex justify-between items-center h-12 relative">
+            
+            {/* Brand Logo */}
+            <Link
+              href="/"
+              className="flex-shrink-0 flex items-center gap-3 group transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Image
+                src="/logo.png"
+                alt="T&D Fashion Trend Logo"
+                width={50}
+                height={50}
+                priority
+                style={{ width: 'auto', height: 'auto' }}
+                className="object-contain mix-blend-multiply max-h-12 w-auto"
+              />
+              <span
+                className="font-playfair text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 whitespace-nowrap"
               >
-                <Image
-                  src="/logo.png"
-                  alt="T&D Fashion Trend Logo"
-                  width={80}
-                  height={80}
-                  style={{ width: 'auto', height: 'auto' }}
-                  priority
-                  className="hidden md:block object-cover mix-blend-multiply max-h-16"
-                />
-                <Image
-                  src="/logo.png"
-                  alt="T&D Fashion Trend Logo"
-                  width={60}
-                  height={60}
-                  style={{ width: 'auto', height: 'auto' }}
-                  priority
-                  className="md:hidden object-cover mix-blend-multiply max-h-12"
-                />
-              </motion.div>
-              <motion.span
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="absolute left-[45%] -translate-x-1/2 md:static md:translate-x-0 font-playfair text-2xl md:text-4xl font-bold tracking-tighter group-hover:opacity-80 transition-opacity whitespace-nowrap"
-                style={{ color: '#D4AF37' }}
-              >
-                T&D <span className="font-light italic" style={{ color: '#C5A028' }}>Trend</span>
-              </motion.span>
+                T&D <span className="font-light italic" style={{ color: '#D4AF37' }}>Trend</span>
+              </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-10">
-              {navLinks.map((link, i) => (
-                <motion.div
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <Link
                   key={link.label}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="text-sm font-semibold text-zinc-700 hover:text-zinc-950 transition-colors relative py-1 group"
                 >
-                  <Link
-                    href={link.href}
-                    className="text-base font-semibold text-zinc-700 hover:text-zinc-900 transition-colors relative group"
-                  >
-                    {link.label}
-                    <span
-                      className="absolute -bottom-2 left-0 w-0 h-[2px] transition-all group-hover:w-full"
-                      style={{ background: '#D4AF37' }}
-                    />
-                  </Link>
-                </motion.div>
+                  {link.label}
+                  <span
+                    className="absolute bottom-0 left-0 w-0 h-[2px] rounded-full transition-all duration-300 group-hover:w-full"
+                    style={{ background: '#D4AF37' }}
+                  />
+                </Link>
               ))}
             </nav>
 
-            {/* Desktop Icons */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* Desktop Actions (Admin, Search, Cart) */}
+            <div className="hidden md:flex items-center space-x-5">
               <button
                 onClick={() => setSearchOpen(true)}
-                aria-label="Search"
-                className="text-zinc-700 hover:text-zinc-900 transition-colors transform hover:scale-110"
+                aria-label="Search Catalog"
+                className="p-2 rounded-full text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/80 transition-all duration-150"
               >
-                <Search className="w-6 h-6" />
+                <Search className="w-5 h-5" />
               </button>
 
               <button
                 onClick={() => setCartOpen(true)}
-                aria-label="Cart"
-                className="text-zinc-700 hover:text-zinc-900 transition-colors relative transform hover:scale-110"
+                aria-label="Shopping Cart"
+                className="p-2 rounded-full text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100/80 transition-all duration-150 relative"
               >
-                <ShoppingBag className="w-6 h-6" />
+                <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
                   <span
-                    className="absolute -top-2 -right-2 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold"
+                    className="absolute 0 top-0.5 right-0.5 text-white text-[11px] w-4.5 h-4.5 flex items-center justify-center rounded-full font-bold shadow-sm"
                     style={{ background: '#D4AF37' }}
                   >
                     {cartCount}
@@ -149,78 +163,76 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Mobile: Search + Cart + Hamburger */}
-            <div className="flex md:hidden items-center gap-4">
+            {/* Mobile Actions: Search, Cart, Toggle */}
+            <div className="flex md:hidden items-center gap-2">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
-                className="text-zinc-800"
+                className="p-2 text-zinc-800"
               >
-                <Search className="w-6 h-6" />
+                <Search className="w-5 h-5" />
               </button>
+
               <button
                 onClick={() => setCartOpen(true)}
                 aria-label="Cart"
-                className="text-zinc-800 relative"
+                className="p-2 text-zinc-800 relative"
               >
-                <ShoppingBag className="w-6 h-6" />
+                <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
                   <span
-                    className="absolute -top-2 -right-2 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold"
+                    className="absolute top-1 right-1 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold"
                     style={{ background: '#D4AF37' }}
                   >
                     {cartCount}
                   </span>
                 )}
               </button>
+
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-zinc-800 focus:outline-none"
+                aria-label="Toggle Menu"
+                className="p-2 text-zinc-800 focus:outline-none"
               >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
+
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl shadow-xl border-t border-zinc-100 overflow-hidden"
-            >
-              <div className="px-4 py-6 space-y-6">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.label}
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: i * 0.07 }}
-                  >
-                    <Link
-                      href={link.href}
-                      className="block text-xl font-playfair text-zinc-900 font-medium hover:opacity-70 transition-opacity"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
+        {/* Mobile Dropdown Menu with smooth transition */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out border-t border-zinc-100 bg-white/95 backdrop-blur-xl ${
+            isOpen ? "max-h-96 opacity-100 py-4 shadow-xl" : "max-h-0 opacity-0 py-0"
+          }`}
+        >
+          <div className="px-6 space-y-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="block text-base font-serif text-zinc-900 font-semibold py-1.5 hover:text-gold-500 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="pt-3 border-t border-zinc-100">
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-900 shadow-sm"
+                style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #a18143 100%)' }}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin Portal
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
     </>
   );
 }
