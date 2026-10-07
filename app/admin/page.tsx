@@ -169,8 +169,17 @@ function AdminPageInner() {
 
   const handleResetCatalog = async () => {
     if (window.confirm('Reset all products and categories to the imported catalog?')) {
-      await resetCatalog();
-      toast.success('Catalog restored to the imported products.', { icon: '🔄' });
+      try {
+        const resetSucceeded = await resetCatalog();
+        if (resetSucceeded) {
+          toast.success('Catalog restored to the imported products.', { icon: '🔄' });
+        } else {
+          toast.error('Catalog reset failed. Check the connection and database permissions.');
+        }
+      } catch (error) {
+        console.error('Catalog reset failed:', error);
+        toast.error('Catalog reset failed. Check the connection and try again.');
+      }
     }
   };
 

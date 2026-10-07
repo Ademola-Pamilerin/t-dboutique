@@ -80,7 +80,7 @@ interface ProductContextType {
   deleteProduct: (id: string | number) => Promise<boolean>;
   addCategory: (categoryData: CategoryInfo) => Promise<boolean>;
   deleteCategory: (slug: string) => Promise<boolean>;
-  resetCatalog: () => Promise<void>;
+  resetCatalog: () => Promise<boolean>;
   getProductBySlug: (slug: string) => Product | undefined;
   getProductsByCategory: (categorySlug: string) => Product[];
   refreshProducts: () => Promise<void>;
@@ -342,10 +342,24 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
   // ── Reset (re-seed from static data) ──────────────────────────────────────
 
-  const resetCatalog = useCallback(async (): Promise<void> => {
-    // Delete all existing data
-    await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('categories').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const resetCatalog = useCallback(async (): Promise<boolean> => {
+    const { error: productDeleteError } = await supabase
+      .from('products')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (productDeleteError) {
+      console.error('Failed to delete products during catalog reset:', productDeleteError.message);
+      return false;
+    }
+
+    const { error: categoryDeleteError } = await supabase
+      .from('categories')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (categoryDeleteError) {
+      console.error('Failed to delete categories during catalog reset:', categoryDeleteError.message);
+      return false;
+    }
 
     // Re-insert default categories
     const catRows = CATEGORIES.map((c) => ({
@@ -354,7 +368,11 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       description: c.description,
       banner_image: c.bannerImage,
     }));
-    await supabase.from('categories').insert(catRows);
+    const { error: categoryInsertError } = await supabase.from('categories').insert(catRows);
+    if (categoryInsertError) {
+      console.error('Failed to restore categories during catalog reset:', categoryInsertError.message);
+      return false;
+    }
 
     // Re-insert default products
     const productRows = ALL_PRODUCTS.map((p) => ({
@@ -374,10 +392,15 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       colors: p.colors ?? [],
       fabric: p.fabric ?? null,
     }));
-    await supabase.from('products').insert(productRows);
+    const { error: productInsertError } = await supabase.from('products').insert(productRows);
+    if (productInsertError) {
+      console.error('Failed to restore products during catalog reset:', productInsertError.message);
+      return false;
+    }
 
     setCategories(CATEGORIES);
     setProducts(ALL_PRODUCTS);
+    return true;
   }, []);
 
   // ── Query helpers ──────────────────────────────────────────────────────────
