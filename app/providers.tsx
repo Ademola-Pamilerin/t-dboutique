@@ -5,6 +5,7 @@ import { store } from './store/store';
 import { Toaster } from 'react-hot-toast';
 import { ProductProvider } from './context/ProductContext';
 import { AuthProvider } from './context/AuthContext';
+import ScrollToTop from './components/common/ScrollToTop';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <ProductProvider>
           {children}
+          <ScrollToTop />
           <Toaster
             position="bottom-right"
             toastOptions={{

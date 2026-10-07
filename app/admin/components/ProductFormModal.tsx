@@ -139,32 +139,35 @@ export default function ProductFormModal({
       return;
     }
 
-    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
-      setError('Each image must be smaller than 10 MB.');
-      setActiveTab('media');
-      return;
-    }
-
     setIsUploading(true);
     setError('');
     const uploadedUrls: string[] = [];
-    for (const file of files) {
-      const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const filePath = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, { contentType: file.type, upsert: false });
+    
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      if (uploadError) {
-        setError(`Image upload failed: ${uploadError.message}`);
-        setIsUploading(false);
-        return;
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed for ${file.name}`);
+        }
+
+        const data = await response.json();
+        uploadedUrls.push(data.url);
       }
-      uploadedUrls.push(supabase.storage.from('product-images').getPublicUrl(filePath).data.publicUrl);
+
+      setImage((currentImage) => currentImage || uploadedUrls[0]);
+      setGallery((currentGallery) => [...currentGallery, ...uploadedUrls]);
+    } catch (err: any) {
+      setError(`Upload failed: ${err.message}`);
+    } finally {
+      setIsUploading(false);
     }
-    setImage((currentImage) => currentImage || uploadedUrls[0]);
-    setGallery((currentGallery) => [...currentGallery, ...uploadedUrls]);
-    setIsUploading(false);
   };
 
   // Add Size

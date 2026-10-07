@@ -77,15 +77,14 @@ export default function FeaturedCollection() {
                 <div className="relative h-64 sm:h-80 md:h-100 mb-4 overflow-hidden bg-zinc-100 rounded-xl">
                   <Link
                     href={`/products/${item.slug}`}
-                    className="block w-full h-full"
+                    className="relative block w-full h-full"
                   >
                     <Image
                       src={item.image}
-                      // src={"/assets/images/products/product-03.jpeg"}
                       alt={item.name}
                       fill
+                      unoptimized
                       className="object-contain transition-transform duration-700 group-hover:scale-105"
-                      // sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 25vw"
                     />
                   </Link>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />

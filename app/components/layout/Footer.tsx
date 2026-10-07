@@ -33,20 +33,20 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-playfair text-lg mb-6">Shop</h4>
             <ul className="space-y-4 text-sm font-inter">
-              <li><Link href="#new-arrivals" className="hover:text-white transition-colors">New Arrivals</Link></li>
-              <li><Link href="#collections" className="hover:text-white transition-colors">Collections</Link></li>
-              <li><Link href="#accessories" className="hover:text-white transition-colors">Accessories</Link></li>
-              <li><Link href="#sale" className="hover:text-white transition-colors">Sale</Link></li>
+              <li><Link href="/gowns" className="hover:text-white transition-colors">Designer Gowns</Link></li>
+              <li><Link href="/clothes" className="hover:text-white transition-colors">Clothes (Skirts &amp; Blouses)</Link></li>
+              <li><Link href="/categories/all" className="hover:text-white transition-colors">All Collections</Link></li>
+              <li><Link href="/#new-arrivals" className="hover:text-white transition-colors">New Arrivals</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-white font-playfair text-lg mb-6">Company</h4>
+            <h4 className="text-white font-playfair text-lg mb-6">Customer Care</h4>
             <ul className="space-y-4 text-sm font-inter">
-              <li><Link href="#about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="#contact" className="hover:text-white transition-colors">Contact</Link></li>
-              <li><Link href="#careers" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition-colors flex items-center gap-1.5" style={{ color: '#D4AF37' }}>⚙️ Admin Portal</Link></li>
+              <li><Link href="/size-guide" className="hover:text-white transition-colors flex items-center gap-1.5" style={{ color: '#D4AF37' }}>📏 Size &amp; Fit Guide</Link></li>
+              <li><Link href="/#about" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/#contact" className="hover:text-white transition-colors">Worldwide Shipping &amp; Contact</Link></li>
+              <li><Link href="/admin" className="hover:text-white transition-colors flex items-center gap-1.5 text-zinc-400">⚙️ Admin Portal</Link></li>
             </ul>
           </div>
 

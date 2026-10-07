@@ -67,7 +67,7 @@ export default function CategoryView({
   }, [sourceProducts, searchQuery, sortBy]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="categories" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       {/* Breadcrumb */}
       <nav className="flex mb-8 text-sm text-zinc-500">
@@ -225,10 +225,24 @@ export default function CategoryView({
                 <div>
                   <p className="text-[11px] md:text-xs text-zinc-400 uppercase tracking-wider mb-1">{product.category}</p>
                   <Link href={`/products/${product.slug}`} className="block group">
-                    <h3 className="text-sm md:text-base font-serif text-zinc-900 leading-snug group-hover:text-gold-500 transition-colors line-clamp-2" style={{ color: undefined }}>
+                    <h3 className="text-sm md:text-base font-serif text-zinc-900 leading-snug group-hover:text-gold-500 transition-colors line-clamp-2">
                       {product.name}
                     </h3>
                   </Link>
+
+                  {/* Size boxes */}
+                  {product.sizes && product.sizes.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {product.sizes.map((sz) => (
+                        <span
+                          key={sz}
+                          className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200"
+                        >
+                          {sz}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

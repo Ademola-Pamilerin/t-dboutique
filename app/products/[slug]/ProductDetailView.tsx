@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/features/cartSlice';
 import toast from 'react-hot-toast';
-import { Product } from '../../categories/[slug]/categoryData';
+import { Product, parseSizes } from '../../categories/[slug]/categoryData';
 import { ShoppingBag, MessageSquare, Check, ShieldCheck, Truck, Sparkles, ChevronRight, ChevronLeft, Minus, Plus, Maximize2, X } from 'lucide-react';
 import { useProducts } from '../../context/ProductContext';
 
@@ -43,13 +43,27 @@ export default function ProductDetailView({ product: initialProduct, relatedProd
     ? product.gallery
     : [product.image];
 
+  const productSizes = useMemo(() => {
+    return (product.sizes ?? []).flatMap((s) => parseSizes(s));
+  }, [product.sizes]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(images[0] || product.image);
-  const [selectedSize, setSelectedSize] = useState(product.sizes ? product.sizes[0] : 'Standard');
+  const [selectedSize, setSelectedSize] = useState(() => {
+    const parsed = (product.sizes ?? []).flatMap((s) => parseSizes(s));
+    return parsed.length > 0 ? parsed[0] : 'Standard';
+  });
   const [selectedColor, setSelectedColor] = useState(product.colors ? product.colors[0] : 'Default');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'details' | 'sizing' | 'delivery'>('details');
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Sync selectedSize if product sizes change
+  useEffect(() => {
+    if (productSizes.length > 0 && !productSizes.includes(selectedSize)) {
+      setSelectedSize(productSizes[0]);
+    }
+  }, [productSizes, selectedSize]);
 
   const viewLabels = defaultViewLabels;
 
@@ -286,28 +300,36 @@ export default function ProductDetailView({ product: initialProduct, relatedProd
           )}
 
           {/* Size Selector */}
-          {product.sizes && product.sizes.length > 0 && (
+          {productSizes.length > 0 && (
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700">
-                  Select Size: <span className="font-normal text-zinc-900">{selectedSize}</span>
-                </label>
-                <button
-                  onClick={() => setActiveTab('sizing')}
-                  className="text-xs font-medium underline transition-colors"
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
+                    Select Size: <span className="font-normal text-zinc-900">{selectedSize}</span>
+                  </label>
+                  {selectedSize.toLowerCase().includes('free') && (
+                    <span className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-300/60 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span>✨</span> Any size of your choice (Flexible Fit)
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href="/size-guide"
+                  target="_blank"
+                  className="text-xs font-medium underline transition-colors cursor-pointer shrink-0"
                   style={{ color: '#a18143' }}
                 >
                   Size Guide
-                </button>
+                </Link>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {product.sizes.map((sz) => (
+              <div className="flex flex-wrap gap-2.5">
+                {productSizes.map((sz) => (
                   <button
                     key={sz}
                     onClick={() => setSelectedSize(sz)}
-                    className={`py-2.5 px-3 rounded-lg text-xs font-medium border transition-all text-center ${
+                    className={`min-w-[4rem] py-2 px-3.5 rounded-lg text-xs font-medium border transition-all text-center cursor-pointer ${
                       selectedSize === sz
-                        ? 'border-gold-500 bg-gold-50 text-zinc-900 font-semibold ring-1 ring-gold-400'
+                        ? 'border-gold-500 bg-gold-50 text-zinc-900 font-semibold ring-1 ring-gold-400 shadow-xs'
                         : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
                     }`}
                     style={selectedSize === sz ? { borderColor: '#D4AF37', backgroundColor: 'rgba(212, 175, 55, 0.08)' } : {}}
@@ -427,14 +449,29 @@ export default function ProductDetailView({ product: initialProduct, relatedProd
 
           {activeTab === 'sizing' && (
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#a18143' }}>
-                Sizing & Bespoke Fit Guide
-              </h4>
-              <p>
-                All our garments follow standard UK/Nigerian sizing. If you require bespoke tailoring, select <strong>&quot;Custom Fitting&quot;</strong> or message us on WhatsApp with your bust, waist, and hip measurements.
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#a18143' }}>
+                  Sizing &amp; Bespoke Fit Guide
+                </h4>
+                <Link
+                  href="/size-guide"
+                  target="_blank"
+                  className="text-xs font-semibold underline"
+                  style={{ color: '#a18143' }}
+                >
+                  Full Size Guide &rarr;
+                </Link>
+              </div>
+
+              <div className="p-3 bg-amber-50/70 border border-amber-200/70 rounded-lg text-xs text-amber-900 leading-relaxed">
+                <strong>Free Size — Any Size of Your Choice:</strong> Garments tagged as Free Size feature flexible silhouettes, wrap styling, or stretch fabric blends engineered to effortlessly fit any size of your choice (typically fitting UK 8 to UK 18 / S to XXL).
+              </div>
+
+              <p className="text-xs text-zinc-600">
+                All individual sizes follow standard UK, US, and Turkey/European charts. If you require bespoke alterations, select <strong>&quot;Custom Fitting&quot;</strong> or message us directly on WhatsApp with your measurements.
               </p>
               <p className="text-zinc-500 text-xs">
-                Our in-house tailors in Lagos will cut the fabric directly to your exact dimensions.
+                Our in-house tailors in Lagos cut and adjust garments to your exact dimensions for both local Nigerian delivery and worldwide express shipping.
               </p>
             </div>
           )}

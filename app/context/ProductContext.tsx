@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ALL_PRODUCTS, CATEGORIES } from '../categories/[slug]/categoryData';
+import { toCloudinaryImageUrl } from '../lib/cloudinaryImages';
+import { ALL_PRODUCTS, CATEGORIES, parseSizes } from '../categories/[slug]/categoryData';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,15 +44,15 @@ function rowToProduct(row: any): Product {
     name: row.name,
     price: row.price,
     rawPrice: row.raw_price,
-    image: row.image,
-    gallery: row.gallery ?? [],
+    image: toCloudinaryImageUrl(row.image),
+    gallery: (row.gallery ?? []).map(toCloudinaryImageUrl),
     category: row.category,
     categorySlug: row.category_slug,
     badge: row.badge ?? undefined,
     isNew: row.is_new ?? false,
     description: row.description ?? undefined,
     details: row.details ?? [],
-    sizes: row.sizes ?? [],
+    sizes: (row.sizes ?? []).flatMap((s: string) => parseSizes(s)),
     colors: row.colors ?? [],
     fabric: row.fabric ?? undefined,
     createdAt: row.created_at ?? undefined,
@@ -64,7 +65,7 @@ function rowToCategory(row: any): CategoryInfo {
     name: row.name,
     slug: row.slug,
     description: row.description,
-    bannerImage: row.banner_image,
+    bannerImage: toCloudinaryImageUrl(row.banner_image),
   };
 }
 
@@ -104,18 +105,18 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       console.error('Failed to load products from Supabase:', error.message);
-      // Fall back to static data
       setProducts(ALL_PRODUCTS);
     } else if (data && data.length > 0) {
-      const catalogProducts = data.filter(
-        (row) =>
-          typeof row.image === 'string' &&
-          (row.image.startsWith('/assets/images/products/') ||
-            row.image.includes('/storage/v1/object/public/product-images/'))
-      );
-      setProducts(catalogProducts.length > 0 ? catalogProducts.map(rowToProduct) : ALL_PRODUCTS);
+      const databaseProducts = data.map(rowToProduct);
+      
+      // Merge with static data using a Map to avoid duplicates by slug
+      const productsBySlug = new Map(ALL_PRODUCTS.map((product) => [product.slug, product]));
+      databaseProducts.forEach((product) => {
+        productsBySlug.set(product.slug, product);
+      });
+      
+      setProducts(Array.from(productsBySlug.values()));
     } else {
-      // Supabase table empty — use static fallback
       setProducts(ALL_PRODUCTS);
     }
   }, []);
@@ -131,7 +132,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       console.error('Failed to load categories from Supabase:', error.message);
       setCategories(CATEGORIES);
     } else if (data && data.length > 0) {
-      setCategories(data.map(rowToCategory));
+      const dbCategories = data.map(rowToCategory);
+      const catMap = new Map(CATEGORIES.map((c) => [c.slug, c]));
+      dbCategories.forEach((c) => catMap.set(c.slug, c));
+      setCategories(Array.from(catMap.values()));
     } else {
       setCategories(CATEGORIES);
     }

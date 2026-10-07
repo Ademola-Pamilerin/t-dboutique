@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { cloudinaryImage } from '../../lib/cloudinaryImages';
 
 const categories = [
-  { name: 'Clothes (Skirts & Blouses)', slug: 'clothes', image: '/assets/images/products/product-01.jpeg' },
+  { name: 'Clothes (Skirts & Blouses)', slug: 'clothes', image: cloudinaryImage('product-01.jpg') },
+  { name: 'Gowns', slug: 'gowns', image: cloudinaryImage('product-383.jpg') },
 ];
 
 export default function CategorySection() {
